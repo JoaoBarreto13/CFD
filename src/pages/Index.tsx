@@ -26,7 +26,7 @@ const Index = () => {
       <div className="max-w-lg mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <img src="/favicon.png" alt="Ceifadora" className="w-8 h-8" />
+            <img src="/ceifadora.jpeg" alt="Ceifadora" className="w-8 h-8 rounded-full object-cover" />
             <h1 className="heading-display text-2xl text-foreground">Convocatórias</h1>
           </div>
           <div className="flex items-center gap-1">

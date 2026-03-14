@@ -17,7 +17,7 @@ export default function HistoryPage() {
     <div className="min-h-screen bg-background pb-20">
       <div className="max-w-lg mx-auto px-4 py-6">
         <div className="flex items-center gap-3 mb-6">
-          <img src="/favicon.png" alt="Ceifadora" className="w-8 h-8 rounded-full" />
+          <img src="/ceifadora.jpeg" alt="Ceifadora" className="w-8 h-8 rounded-full object-cover" />
           <h1 className="heading-display text-2xl text-foreground">Histórico</h1>
         </div>
 

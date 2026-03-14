@@ -43,7 +43,7 @@ export default function AuthPage() {
         setLoading(false);
         return;
       }
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -53,6 +53,10 @@ export default function AuthPage() {
       });
       if (error) {
         toast.error(error.message);
+      } else if (data.session) {
+        // Email confirmation is disabled — user is logged in immediately
+        toast.success("Conta criada com sucesso!");
+        navigate("/");
       } else {
         toast.success("Conta criada! Verifique seu email para confirmar.");
       }
@@ -68,7 +72,7 @@ export default function AuthPage() {
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="flex justify-center mb-4">
-          <img src="/favicon.png" alt="Ceifadora" className="w-16 h-16" />
+          <img src="/ceifadora.jpeg" alt="Ceifadora" className="w-16 h-16 rounded-full object-cover" />
         </div>
 
         <h1 className="heading-display text-3xl text-foreground text-center mb-1">
