@@ -34,7 +34,7 @@ function AppRoutes() {
           element={loading ? <div className="min-h-screen bg-background" /> : user ? <Navigate to="/" replace /> : <AuthPage />}
         />
         <Route path="/e/:token" element={<PublicEvent />} />
-        <Route path="/" element={<Index />} />
+        <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
         <Route path="/evento/:id" element={<EventDetail />} />
         <Route path="/historico" element={<ProtectedRoute><HistoryPage /></ProtectedRoute>} />
         <Route path="/criar" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
