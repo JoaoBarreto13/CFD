@@ -8,6 +8,7 @@ import { BottomNav } from "@/components/BottomNav";
 import Index from "./pages/Index.tsx";
 import CreateEvent from "./pages/CreateEvent.tsx";
 import AuthPage from "./pages/Auth.tsx";
+import AuthCallback from "./pages/Callback.tsx";
 import PublicEvent from "./pages/PublicEvent.tsx";
 import EventDetail from "./pages/EventDetail.tsx";
 import NotificationsPage from "./pages/Notifications.tsx";
@@ -33,6 +34,7 @@ function AppRoutes() {
           path="/auth"
           element={loading ? <div className="min-h-screen bg-background" /> : user ? <Navigate to="/" replace /> : <AuthPage />}
         />
+        <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/e/:token" element={<PublicEvent />} />
         <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
         <Route path="/evento/:id" element={<EventDetail />} />

@@ -1,6 +1,7 @@
 import { Share2, Check } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { getAppBaseUrl } from "@/lib/app-url";
 
 interface ShareButtonProps {
   shareToken: string;
@@ -11,7 +12,7 @@ export function ShareButton({ shareToken, compact }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/e/${shareToken}`;
+    const url = `${getAppBaseUrl()}/e/${shareToken}`;
 
     if (navigator.share) {
       try {

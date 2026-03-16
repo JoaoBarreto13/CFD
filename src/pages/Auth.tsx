@@ -2,6 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { getAppBaseUrl } from "@/lib/app-url";
 
 export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "signup" | "reset">("login");
@@ -13,8 +14,9 @@ export default function AuthPage() {
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    const appBaseUrl = getAppBaseUrl();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth`,
+      redirectTo: `${appBaseUrl}/auth`,
     });
     if (error) {
       toast.error(error.message);
@@ -47,7 +49,7 @@ export default function AuthPage() {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${getAppBaseUrl()}/auth/callback`,
           data: { display_name: displayName.trim() },
         },
       });
