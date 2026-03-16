@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 export default function AuthPage() {
-  const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "signup" | "reset">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,7 +33,9 @@ export default function AuthPage() {
       if (error) {
         toast.error(error.message);
       } else {
-        navigate("/");
+        // Full reload so AuthProvider has session before "/" is rendered (avoids race with onAuthStateChange)
+        window.location.href = "/";
+        return;
       }
     } else {
       if (!displayName.trim()) {
@@ -56,7 +56,9 @@ export default function AuthPage() {
       } else if (data.session) {
         // Email confirmation is disabled — user is logged in immediately
         toast.success("Conta criada com sucesso!");
-        navigate("/");
+        // Full reload so AuthProvider has session before "/" is rendered (avoids race with onAuthStateChange)
+        window.location.href = "/";
+        return;
       } else {
         toast.success("Conta criada! Verifique seu email para confirmar.");
       }
@@ -64,8 +66,16 @@ export default function AuthPage() {
     setLoading(false);
   };
 
-  const handleGuestAccess = () => {
-    navigate("/");
+  const handleGuestAccess = async () => {
+    setLoading(true);
+    const { error } = await supabase.auth.signInAnonymously();
+    if (error) {
+      toast.error(error.message);
+      setLoading(false);
+      return;
+    }
+    // Full reload so AuthProvider picks up the new session before "/" is rendered (avoids race with onAuthStateChange)
+    window.location.href = "/";
   };
 
   return (
@@ -87,8 +97,9 @@ export default function AuthPage() {
           size="lg"
           className="w-full mb-6 text-muted-foreground"
           onClick={handleGuestAccess}
+          disabled={loading}
         >
-          Continuar como Convidado
+          {loading ? "..." : "Continuar como Convidado"}
         </Button>
 
         <div className="flex items-center gap-3 mb-6">
