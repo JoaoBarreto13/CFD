@@ -186,7 +186,7 @@ export default function EventDetail() {
                   )}
                 </div>
               </div>
-              {user && status === "upcoming" && <RsvpSegment eventId={event.id} initialValue={(userResponse?.status as "sim" | "nao") || null} />}
+              {user && status === "upcoming" && <RsvpSegment eventId={event.id} initialValue={(userResponse?.status as "sim" | "nao") || null} guestName={userResponse?.guest_name || undefined} />}
               {status === "in-progress" && (
                 <div className="bg-accent/10 rounded-inner p-3 text-center">
                   <p className="text-sm font-semibold text-accent">🏐 Evento em andamento!</p>

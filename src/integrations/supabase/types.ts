@@ -102,6 +102,7 @@ export type Database = {
           created_at: string
           event_id: string | null
           id: string
+          kind: string
           message: string
           read: boolean
           user_id: string
@@ -110,6 +111,7 @@ export type Database = {
           created_at?: string
           event_id?: string | null
           id?: string
+          kind?: string
           message: string
           read?: boolean
           user_id: string
@@ -118,6 +120,7 @@ export type Database = {
           created_at?: string
           event_id?: string | null
           id?: string
+          kind?: string
           message?: string
           read?: boolean
           user_id?: string

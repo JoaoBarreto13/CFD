@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useRespondToEvent } from "@/hooks/useEvents";
+import { toast } from "sonner";
 
 interface RsvpSegmentProps {
   eventId: string;
@@ -16,38 +17,60 @@ const options = [
 
 export function RsvpSegment({ eventId, initialValue = null, guestName }: RsvpSegmentProps) {
   const [selected, setSelected] = useState<"sim" | "nao" | null>(initialValue);
-  const { user } = useAuth();
+  const [guestDisplayName, setGuestDisplayName] = useState(guestName || "");
+  const { user, isAnonymous } = useAuth();
   const respondMutation = useRespondToEvent();
 
   const handleSelect = (key: "sim" | "nao") => {
+    if (isAnonymous && !guestDisplayName.trim()) {
+      toast.error("Digite seu nome");
+      return;
+    }
+
     setSelected(key);
     respondMutation.mutate({
       event_id: eventId,
       status: key,
       user_id: user?.id,
-      guest_name: guestName,
+      guest_name: isAnonymous ? guestDisplayName.trim() : undefined,
     });
   };
 
   return (
-    <div className="relative flex bg-background-secondary rounded-inner p-1 gap-1">
-      {options.map((opt) => (
-        <button
-          key={opt.key}
-          className="relative flex-1 py-2 text-sm font-semibold text-center z-10 transition-default rounded-[6px]"
-          style={{ color: selected === opt.key ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}
-          onClick={() => handleSelect(opt.key)}
-        >
-          {selected === opt.key && (
-            <motion.div
-              layoutId={`rsvp-${eventId}`}
-              className="absolute inset-0 bg-card rounded-[6px] card-shadow"
-              transition={{ type: "spring", duration: 0.4, bounce: 0 }}
-            />
-          )}
-          <span className="relative z-10">{opt.label}</span>
-        </button>
-      ))}
+    <div className="space-y-3">
+      {isAnonymous && (
+        <div>
+          <label className="text-label text-muted-foreground block mb-2">Seu Nome</label>
+          <input
+            type="text"
+            value={guestDisplayName}
+            onChange={(event) => setGuestDisplayName(event.target.value)}
+            placeholder="Como te chamam?"
+            className="w-full h-11 px-4 bg-background-secondary rounded-inner text-foreground font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-default"
+            maxLength={50}
+          />
+        </div>
+      )}
+
+      <div className="relative flex bg-background-secondary rounded-inner p-1 gap-1">
+        {options.map((opt) => (
+          <button
+            key={opt.key}
+            className="relative flex-1 py-2 text-sm font-semibold text-center z-10 transition-default rounded-[6px]"
+            style={{ color: selected === opt.key ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}
+            onClick={() => handleSelect(opt.key)}
+          >
+            {selected === opt.key && (
+              <motion.div
+                layoutId={`rsvp-${eventId}`}
+                className="absolute inset-0 bg-card rounded-[6px] card-shadow"
+                transition={{ type: "spring", duration: 0.4, bounce: 0 }}
+              />
+            )}
+            <span className="relative z-10">{opt.label}</span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

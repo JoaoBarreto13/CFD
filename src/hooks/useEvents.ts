@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { createNotification } from "@/hooks/useNotifications";
+import { upsertPresenceNotification } from "@/hooks/useNotifications";
 
 export interface EventWithResponses {
   id: string;
@@ -22,6 +22,36 @@ export interface EventWithResponses {
   }[];
 }
 
+async function hydrateResponsesWithProfileNames(
+  responses: {
+    id: string;
+    event_id: string;
+    guest_name: string | null;
+    user_id: string | null;
+    status: string;
+  }[],
+) {
+  const allUserIds = responses.filter((response) => response.user_id).map((response) => response.user_id!);
+
+  if (allUserIds.length === 0) {
+    return responses;
+  }
+
+  const { data: profiles } = await supabase.from("profiles").select("id, display_name").in("id", allUserIds);
+
+  const profileMap: Record<string, string> = {};
+  if (profiles) {
+    profiles.forEach((profile) => {
+      profileMap[profile.id] = profile.display_name;
+    });
+  }
+
+  return responses.map((response) => ({
+    ...response,
+    guest_name: response.user_id ? (profileMap[response.user_id] || response.guest_name) : response.guest_name,
+  }));
+}
+
 export function useEvents() {
   return useQuery({
     queryKey: ["events"],
@@ -39,23 +69,12 @@ export function useEvents() {
 
       if (respError) throw respError;
 
-      // Get profile names for user responses
-      const allUserIds = (responses || []).filter(r => r.user_id).map(r => r.user_id!);
-      let profileMap: Record<string, string> = {};
-      if (allUserIds.length > 0) {
-        const { data: profiles } = await supabase.from("profiles").select("id, display_name").in("id", allUserIds);
-        if (profiles) {
-          profiles.forEach(p => { profileMap[p.id] = p.display_name; });
-        }
-      }
+      const hydratedResponses = await hydrateResponsesWithProfileNames(responses || []);
 
       return (events || []).map((e) => ({
         ...e,
         total_price: Number(e.total_price),
-        responses: (responses || []).filter((r) => r.event_id === e.id).map(r => ({
-          ...r,
-          guest_name: r.user_id ? (profileMap[r.user_id] || r.guest_name) : r.guest_name,
-        })),
+        responses: hydratedResponses.filter((r) => r.event_id === e.id),
       }));
     },
   });
@@ -81,10 +100,12 @@ export function useEventByToken(token: string | undefined) {
         .select("*")
         .eq("event_id", event.id);
 
+      const hydratedResponses = await hydrateResponsesWithProfileNames(responses || []);
+
       return {
         ...event,
         total_price: Number(event.total_price),
-        responses: responses || [],
+        responses: hydratedResponses,
       };
     },
   });
@@ -172,6 +193,7 @@ export function useRespondToEvent() {
       guest_name?: string;
     }) => {
       let eventCreatorId: string | null = null;
+      const normalizedGuestName = response.guest_name?.trim() || undefined;
 
       // Get event creator for notification
       const { data: eventData } = await supabase
@@ -184,6 +206,14 @@ export function useRespondToEvent() {
         eventCreatorId = eventData[0].created_by;
       }
 
+      if (response.user_id && normalizedGuestName) {
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .upsert({ id: response.user_id, display_name: normalizedGuestName });
+
+        if (profileError) throw profileError;
+      }
+
       if (response.user_id) {
         const { data: existing } = await supabase
           .from("event_responses")
@@ -193,9 +223,14 @@ export function useRespondToEvent() {
           .limit(1);
 
         if (existing && existing.length > 0) {
+          const updates: { status: string; guest_name?: string } = { status: response.status };
+          if (normalizedGuestName) {
+            updates.guest_name = normalizedGuestName;
+          }
+
           const { error } = await supabase
             .from("event_responses")
-            .update({ status: response.status })
+            .update(updates)
             .eq("id", existing[0].id);
           if (error) throw error;
         } else {
@@ -205,15 +240,16 @@ export function useRespondToEvent() {
               event_id: response.event_id,
               status: response.status,
               user_id: response.user_id,
+              guest_name: normalizedGuestName,
             });
           if (error) throw error;
         }
-      } else if (response.guest_name) {
+      } else if (normalizedGuestName) {
         const { data: existing } = await supabase
           .from("event_responses")
           .select("id")
           .eq("event_id", response.event_id)
-          .eq("guest_name", response.guest_name)
+          .eq("guest_name", normalizedGuestName)
           .limit(1);
 
         if (existing && existing.length > 0) {
@@ -228,21 +264,18 @@ export function useRespondToEvent() {
             .insert({
               event_id: response.event_id,
               status: response.status,
-              guest_name: response.guest_name,
+              guest_name: normalizedGuestName,
             });
           if (error) throw error;
         }
       }
 
-      // Create notification for event creator
-      if (eventCreatorId && response.status === "sim") {
-        const name = response.guest_name || "Um membro";
-        const statusText = "confirmou presença";
+      // Keep one aggregated confirmation notification per event.
+      if (eventCreatorId && response.status === "sim" && response.user_id) {
         try {
-          await createNotification({
+          await upsertPresenceNotification({
             user_id: eventCreatorId,
             event_id: response.event_id,
-            message: `${name} ${statusText}!`,
           });
         } catch {
           // notification failure shouldn't block the response

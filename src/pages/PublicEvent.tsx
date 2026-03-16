@@ -6,11 +6,13 @@ import { Clock, MapPin, Users, ExternalLink, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function PublicEvent() {
   const { token } = useParams<{ token: string }>();
   const { data: event, isLoading } = useEventByToken(token);
   const respondMutation = useRespondToEvent();
+  const { user, isAnonymous } = useAuth();
   const [guestName, setGuestName] = useState("");
   const [selected, setSelected] = useState<"sim" | "nao" | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -38,7 +40,9 @@ export default function PublicEvent() {
     : event.total_price;
 
   const handleSubmit = async () => {
-    if (!guestName.trim()) {
+    const normalizedGuestName = guestName.trim();
+
+    if ((!user || isAnonymous) && !normalizedGuestName) {
       toast.error("Digite seu nome");
       return;
     }
@@ -51,7 +55,8 @@ export default function PublicEvent() {
       await respondMutation.mutateAsync({
         event_id: event.id,
         status: selected,
-        guest_name: guestName.trim(),
+        user_id: user?.id,
+        guest_name: normalizedGuestName || undefined,
       });
       setSubmitted(true);
       toast.success("Resposta registrada!");
@@ -143,6 +148,7 @@ export default function PublicEvent() {
                 placeholder="Como te chamam?"
                 className="w-full h-11 px-4 bg-background-secondary rounded-inner text-foreground font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-default"
                 maxLength={50}
+                required={!user || isAnonymous}
               />
             </div>
 
