@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useUpdateEvent, useDeleteEvent, type EventWithResponses } from "@/hooks/useEvents";
 import { useAuth } from "@/hooks/useAuth";
-import { formatEventDate, getInitials, getEventStatus, getEventStatusLabel } from "@/lib/format";
+import { formatEventDate, getInitials, getEventStatus, getEventStatusLabel, parseDateOnly } from "@/lib/format";
 import { Clock, MapPin, ExternalLink, ArrowLeft, Check, X, Pencil, Trash2, Save, Play, CircleCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShareButton } from "@/components/ShareButton";
@@ -172,7 +172,7 @@ export default function EventDetail() {
                   {statusLabel}
                 </span>
               </div>
-              <h1 className="heading-display text-3xl text-foreground mt-2 mb-4">{formatEventDate(new Date(event.date))}</h1>
+              <h1 className="heading-display text-3xl text-foreground mt-2 mb-4">{formatEventDate(parseDateOnly(event.date))}</h1>
               <div className="space-y-2 mb-6">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Clock className="w-4 h-4" /><span className="font-medium">{event.time}h</span>

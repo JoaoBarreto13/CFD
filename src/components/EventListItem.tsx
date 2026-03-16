@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { EventWithResponses } from "@/hooks/useEvents";
-import { formatEventDate } from "@/lib/format";
+import { formatEventDate, parseDateOnly } from "@/lib/format";
 import { Clock, MapPin, Users } from "lucide-react";
 
 interface EventListItemProps {
@@ -31,7 +31,7 @@ export function EventListItem({ event, index }: EventListItemProps) {
         </span>
       </div>
       <h3 className="font-bold text-lg text-foreground mb-2">
-        {formatEventDate(new Date(event.date))}
+        {formatEventDate(parseDateOnly(event.date))}
       </h3>
       <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
         <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{event.time}h</span>

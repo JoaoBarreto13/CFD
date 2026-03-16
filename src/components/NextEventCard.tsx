@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { EventWithResponses } from "@/hooks/useEvents";
-import { formatEventDate, getInitials, getEventStatus, getEventStatusLabel } from "@/lib/format";
+import { formatEventDate, getInitials, getEventStatus, getEventStatusLabel, parseDateOnly } from "@/lib/format";
 import { MapPin, Clock, Play, CircleCheck } from "lucide-react";
 import { RsvpSegment } from "./RsvpSegment";
 
@@ -33,7 +33,7 @@ export function NextEventCard({ event }: NextEventCardProps) {
       </div>
 
       <h2 className="heading-display text-3xl mb-4 text-foreground">
-        {formatEventDate(new Date(event.date))}
+        {formatEventDate(parseDateOnly(event.date))}
       </h2>
 
       <div className="space-y-2 mb-6">

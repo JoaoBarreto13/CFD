@@ -7,16 +7,17 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { parseDateOnly, startOfTodayLocal } from "@/lib/format";
 
 const Index = () => {
   const { data: events, isLoading } = useEvents();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
-  const now = new Date();
+  const today = startOfTodayLocal();
   const upcoming = (events || [])
-    .filter((e) => new Date(e.date) >= new Date(now.toDateString()))
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    .filter((e) => parseDateOnly(e.date) >= today)
+    .sort((a, b) => parseDateOnly(a.date).getTime() - parseDateOnly(b.date).getTime());
 
   const nextEvent = upcoming[0];
   const restEvents = upcoming.slice(1);

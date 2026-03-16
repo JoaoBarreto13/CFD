@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import { useEventByToken, useRespondToEvent } from "@/hooks/useEvents";
-import { formatEventDate, getInitials } from "@/lib/format";
+import { formatEventDate, getInitials, parseDateOnly } from "@/lib/format";
 import { Clock, MapPin, Users, ExternalLink, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -84,7 +84,7 @@ export default function PublicEvent() {
           </span>
 
           <h1 className="heading-display text-3xl text-foreground mt-2 mb-4">
-            {formatEventDate(new Date(event.date))}
+            {formatEventDate(parseDateOnly(event.date))}
           </h1>
 
           <div className="space-y-2 mb-6">

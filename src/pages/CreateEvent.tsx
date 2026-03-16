@@ -5,6 +5,7 @@ import { ArrowLeft, CalendarDays, Clock, MapPin, Link2, Users } from "lucide-rea
 import { useCreateEvent } from "@/hooks/useEvents";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { getTodayDateInputValue } from "@/lib/format";
 
 export default function CreateEvent() {
   const navigate = useNavigate();
@@ -85,7 +86,7 @@ export default function CreateEvent() {
             <div className="relative">
               <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
-                min={new Date().toISOString().split("T")[0]}
+                min={getTodayDateInputValue()}
                 className="w-full h-11 pl-10 pr-4 bg-background-secondary rounded-inner text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-ring transition-default" required />
             </div>
           </div>

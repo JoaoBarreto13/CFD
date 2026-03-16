@@ -3,15 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { formatEventDate, getInitials } from "@/lib/format";
 import { Clock, MapPin, Users, Check, HelpCircle, X } from "lucide-react";
 import { motion } from "framer-motion";
+import { parseDateOnly, startOfTodayLocal } from "@/lib/format";
 
 export default function HistoryPage() {
   const { data: events, isLoading } = useEvents();
   const navigate = useNavigate();
 
-  const now = new Date();
+  const today = startOfTodayLocal();
   const past = (events || [])
-    .filter((e) => new Date(e.date) < new Date(now.toDateString()))
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    .filter((e) => parseDateOnly(e.date) < today)
+    .sort((a, b) => parseDateOnly(b.date).getTime() - parseDateOnly(a.date).getTime());
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -52,7 +53,7 @@ export default function HistoryPage() {
                       {event.type === "treino" ? "Treino" : "Amistoso"}
                     </span>
                     <h3 className="heading-display text-lg text-foreground mt-1">
-                      {formatEventDate(new Date(event.date))}
+                      {formatEventDate(parseDateOnly(event.date))}
                     </h3>
                   </div>
                 </div>
