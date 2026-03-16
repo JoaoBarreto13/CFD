@@ -4,8 +4,7 @@ Este projeto é uma aplicação frontend construída com Vite, React, TypeScript
 
 ### Requisitos
 
-- Node.js e npm instalados (recomendado usar nvm)  
-  Veja: [instalar com nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- Node.js e npm instalados 
 
 ### Como rodar o projeto localmente
 
