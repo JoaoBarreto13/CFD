@@ -27,7 +27,7 @@ function useEventById(id: string | undefined) {
       const event = events[0];
       const { data: responses } = await supabase.from("event_responses").select("*").eq("event_id", event.id);
       const userIds = (responses || []).filter(r => r.user_id).map(r => r.user_id!);
-      let profileMap: Record<string, string> = {};
+      const profileMap: Record<string, string> = {};
       if (userIds.length > 0) {
         const { data: profiles } = await supabase.from("profiles").select("id, display_name").in("id", userIds);
         if (profiles) profiles.forEach(p => { profileMap[p.id] = p.display_name; });
@@ -68,7 +68,10 @@ export default function EventDetail() {
       await updateEvent.mutateAsync({ id: event.id, type: editData.type, date: editData.date, time: editData.time, location: editData.location, maps_link: editData.maps_link || null, max_players: Number(editData.max_players) });
       toast.success("Convocatória atualizada!");
       setEditing(false);
-    } catch (err: any) { toast.error(err.message || "Erro ao atualizar"); }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Erro ao atualizar";
+      toast.error(message);
+    }
   };
 
   const handleDelete = async () => {
@@ -77,7 +80,10 @@ export default function EventDetail() {
       await deleteEvent.mutateAsync(event.id);
       toast.success("Convocatória excluída!");
       navigate("/");
-    } catch (err: any) { toast.error(err.message || "Erro ao excluir"); }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Erro ao excluir";
+      toast.error(message);
+    }
   };
 
   if (isLoading) return <div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground">Carregando...</p></div>;

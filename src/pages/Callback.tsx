@@ -9,7 +9,7 @@ export default function AuthCallback() {
     supabase.auth.getSession().then(() => {
       navigate("/");
     });
-  }, []);
+  }, [navigate]);
 
   return <p>Confirmando login...</p>;
 }

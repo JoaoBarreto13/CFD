@@ -12,13 +12,13 @@ export default function NotificationsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: notifications, isLoading } = useNotifications(user?.id);
-  const markRead = useMarkNotificationsRead();
+  const { mutate: markRead } = useMarkNotificationsRead();
 
   useEffect(() => {
     if (user?.id) {
-      markRead.mutate(user.id);
+      markRead(user.id);
     }
-  }, [user?.id]);
+  }, [user?.id, markRead]);
 
   return (
     <div className="min-h-screen bg-background pb-20">

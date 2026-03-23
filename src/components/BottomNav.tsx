@@ -12,7 +12,14 @@ export function BottomNav() {
   // Hide on auth page and public event page
   if (location.pathname === "/auth" || location.pathname.startsWith("/e/")) return null;
 
-  const tabs = [
+  type NavTab = {
+    path: string;
+    icon: typeof CalendarDays;
+    label: string;
+    badge?: number;
+  };
+
+  const tabs: NavTab[] = [
     { path: "/", icon: CalendarDays, label: "Convocatórias" },
     ...(user ? [
       { path: "/criar", icon: Plus, label: "Criar" },
@@ -36,9 +43,9 @@ export function BottomNav() {
             >
               <tab.icon className="w-5 h-5" />
               <span className="text-[11px] font-semibold">{tab.label}</span>
-              {"badge" in tab && (tab as any).badge > 0 && (
+              {!!tab.badge && tab.badge > 0 && (
                 <span className="absolute -top-0.5 right-2 w-4 h-4 bg-accent text-accent-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
-                  {(tab as any).badge}
+                  {tab.badge}
                 </span>
               )}
             </button>

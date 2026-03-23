@@ -1,14 +1,15 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import { useEventByToken, useRespondToEvent } from "@/hooks/useEvents";
 import { formatEventDate, getInitials, parseDateOnly } from "@/lib/format";
-import { Clock, MapPin, Users, ExternalLink, Check, X } from "lucide-react";
+import { Clock, MapPin, Users, ExternalLink, Check, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function PublicEvent() {
+  const navigate = useNavigate();
   const { token } = useParams<{ token: string }>();
   const { data: event, isLoading } = useEventByToken(token);
   const respondMutation = useRespondToEvent();
@@ -60,8 +61,9 @@ export default function PublicEvent() {
       });
       setSubmitted(true);
       toast.success("Resposta registrada!");
-    } catch (err: any) {
-      toast.error(err.message || "Erro ao responder");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Erro ao responder";
+      toast.error(message);
     }
   };
 
@@ -73,6 +75,19 @@ export default function PublicEvent() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-lg mx-auto px-4 py-8">
+        <div className="mb-4">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="gap-2"
+            onClick={() => navigate(user && !isAnonymous ? "/" : "/auth")}
+          >
+            <Home className="w-4 h-4" />
+            Home
+          </Button>
+        </div>
+
         <motion.div
           className="bg-card rounded-card p-6 card-shadow-elevated mb-6"
           initial={{ opacity: 0, y: 10 }}

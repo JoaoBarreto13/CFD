@@ -46,8 +46,9 @@ export default function CreateEvent() {
       });
       toast.success("Convocatória criada!");
       navigate("/");
-    } catch (err: any) {
-      toast.error(err.message || "Erro ao criar convocatória");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Erro ao criar convocatória";
+      toast.error(message);
     }
   };
 
