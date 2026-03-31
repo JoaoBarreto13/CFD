@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 export interface Notification {
   id: string;
@@ -12,6 +13,34 @@ export interface Notification {
 }
 
 export function useNotifications(userId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!userId) {
+      return;
+    }
+
+    const channel = supabase
+      .channel(`notifications:${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${userId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["notifications", userId] });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [queryClient, userId]);
+
   return useQuery({
     queryKey: ["notifications", userId],
     enabled: !!userId,
@@ -121,10 +150,13 @@ export async function upsertPresenceNotification(params: {
 
   const names = confirmed
     .map((response) => {
+      if (response.guest_name) {
+        return response.guest_name;
+      }
       if (response.user_id && profileMap[response.user_id]) {
         return profileMap[response.user_id];
       }
-      return response.guest_name || "Membro";
+      return "Membro";
     })
     .filter((name, index, all) => all.indexOf(name) === index);
 

@@ -37,7 +37,7 @@ function useEventById(id: string | undefined) {
         total_price: Number(event.total_price),
         responses: (responses || []).map(r => ({
           ...r,
-          guest_name: r.user_id ? (profileMap[r.user_id] || r.guest_name) : r.guest_name,
+          guest_name: r.guest_name || (r.user_id ? profileMap[r.user_id] : null),
         })),
       };
     },

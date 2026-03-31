@@ -1,6 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { upsertPresenceNotification } from "@/hooks/useNotifications";
 
 export interface EventWithResponses {
   id: string;
@@ -48,7 +47,7 @@ async function hydrateResponsesWithProfileNames(
 
   return responses.map((response) => ({
     ...response,
-    guest_name: response.user_id ? (profileMap[response.user_id] || response.guest_name) : response.guest_name,
+    guest_name: response.guest_name || (response.user_id ? profileMap[response.user_id] : null),
   }));
 }
 
@@ -192,19 +191,7 @@ export function useRespondToEvent() {
       user_id?: string;
       guest_name?: string;
     }) => {
-      let eventCreatorId: string | null = null;
       const normalizedGuestName = response.guest_name?.trim() || undefined;
-
-      // Get event creator for notification
-      const { data: eventData } = await supabase
-        .from("events")
-        .select("created_by, type, date")
-        .eq("id", response.event_id)
-        .limit(1);
-
-      if (eventData && eventData.length > 0) {
-        eventCreatorId = eventData[0].created_by;
-      }
 
       if (response.user_id && normalizedGuestName) {
         const { error: profileError } = await supabase
@@ -270,17 +257,6 @@ export function useRespondToEvent() {
         }
       }
 
-      // Keep one aggregated confirmation notification per event.
-      if (eventCreatorId && response.status === "sim" && response.user_id) {
-        try {
-          await upsertPresenceNotification({
-            user_id: eventCreatorId,
-            event_id: response.event_id,
-          });
-        } catch {
-          // notification failure shouldn't block the response
-        }
-      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["events"] });
