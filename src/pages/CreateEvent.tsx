@@ -124,7 +124,7 @@ export default function CreateEvent() {
             <label className="text-label text-muted-foreground block mb-2">Nº de Vagas</label>
             <div className="relative">
               <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input type="number" min="2" max="30" value={maxPlayers} onChange={(e) => setMaxPlayers(e.target.value)}
+              <input type="number" min="2" max="48" value={maxPlayers} onChange={(e) => setMaxPlayers(e.target.value)}
                 className="w-full h-11 pl-10 pr-4 bg-background-secondary rounded-inner text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-ring transition-default" required />
             </div>
             <p className="text-xs text-muted-foreground mt-1">Número máximo de jogadores</p>
